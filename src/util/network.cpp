@@ -16,13 +16,13 @@ void printMacAddress(byte mac[]) {
   Serial.println();
 }
 
-void printCurrentNet() {
+void printWifiNetworkInfo() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
 
   // print the MAC address of the router you're attached to:
-  byte bssid[6];
+  byte bssid[WL_MAC_ADDR_LENGTH];
   WiFi.BSSID(bssid);
   Serial.print("BSSID: ");
   printMacAddress(bssid);
@@ -44,10 +44,9 @@ void printWifiData() {
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
-  Serial.println(ip);
 
   // print your MAC address:
-  byte mac[6];
+  byte mac[WL_MAC_ADDR_LENGTH];
   WiFi.macAddress(mac);
   Serial.print("MAC address: ");
   printMacAddress(mac);

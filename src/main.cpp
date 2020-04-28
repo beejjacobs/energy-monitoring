@@ -33,12 +33,12 @@ void setup() {
 
   // you're connected now, so print out the data:
   Serial.print("You're connected to the network");
-  printCurrentNet();
+  printWifiNetworkInfo();
   printWifiData();
 }
 
 void loop() {
   // check the network connection once every 10 seconds:
   delay(10000);
-  printCurrentNet();
+  printWifiNetworkInfo();
 }
