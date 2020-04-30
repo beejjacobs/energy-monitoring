@@ -4,9 +4,9 @@
 
 #include "api.h"
 #include "debug.h"
+#include "network.h"
 #include "pulses.h"
 #include "secrets.h"
-#include "util/network.h"
 
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
