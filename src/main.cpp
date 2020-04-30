@@ -3,6 +3,7 @@
 #include <WiFiNINA.h>
 
 #include "api.h"
+#include "debug.h"
 #include "pulses.h"
 #include "secrets.h"
 #include "util/network.h"
@@ -24,35 +25,36 @@ void onPulse() {
 }
 
 void setup() {
-  Serial.begin(9600);
-  while (!Serial) {
+  if (debug) {
+    Serial.begin(9600);
+    while (!Serial) {
+    }
   }
 
   if (WiFi.status() == WL_NO_MODULE) {
-    Serial.println("Communication with WiFi module failed!");
+    debugPrintln("Communication with WiFi module failed!");
     while (true) {
     }
   }
 
   String fv = WiFi.firmwareVersion();
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
-    Serial.println("Please upgrade the firmware");
+    debugPrintln("Please upgrade the firmware");
   }
 
-  Serial.print("Attempting to connect to WPA SSID: ");
-  Serial.println(ssid);
+  debugPrint("Attempting to connect to WPA SSID: ");
+  debugPrintln(ssid);
   status = WiFi.begin(ssid, pass);
 
   while (status != WL_CONNECTED) {
     delay(2000);
-    Serial.print("Attempting to connect to WPA SSID: ");
-    Serial.println(ssid);
+    debugPrint("Attempting to connect to WPA SSID: ");
+    debugPrintln(ssid);
     status = WiFi.begin(ssid, pass);
   }
 
-  Serial.println("Connected to the network");
-  printWifiNetworkInfo();
-  printWifiData();
+  debugPrintln("Connected to the network");
+  printIp();
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(digPin, INPUT);
@@ -67,7 +69,7 @@ void loop() {
   WiFiClient client = server.available();  // listen for incoming clients
 
   if (client) {                    // if you get a client,
-    // Serial.println("new client");  // print a message out the serial port
+    // debugPrintln("new client");  // print a message out the serial port
     ApiAction action = ApiAction::UNKNOWN;
     String currentLine = "";       // make a String to hold incoming data from the client
     while (client.connected()) {   // loop while the client's connected
@@ -79,8 +81,8 @@ void loop() {
           // if the current line is blank, you got two newline characters in a row.
           // that's the end of the client HTTP request, so send a response:
           if (currentLine.length() == 0) {
-            Serial.print("HTTP request ");
-            Serial.println((byte) action);
+            debugPrint("HTTP request ");
+            debugPrintln((byte) action);
 
             switch (action) {
               case ApiAction::UNKNOWN:
