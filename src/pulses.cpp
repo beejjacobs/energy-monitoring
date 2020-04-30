@@ -16,18 +16,11 @@ void Pulses::reset() {
   length = 0;
 }
 
-void Pulses::printTo(WiFiClient& client) {
-  client.print("{");
-    client.print("\"time\":");
-    client.print(millis());
-    client.print(",");
-    client.print("\"pulses\":[");
-    for (uint32_t i = 0; i < length; i++) {
-      client.print(buffer[i]);
-      if (i != (length - 1)) {
-        client.print(",");
-      }
-    }
-    client.print("]");
-  client.print("}");
+void Pulses::printTo(Print& client) {
+  uint32_t now = millis();
+
+  client.write((byte*)&now, sizeof(now));
+  for (uint32_t i = 0; i < length; i++) {
+    client.write((byte*)&buffer[i], sizeof(buffer[i]));
+  }
 }

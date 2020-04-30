@@ -13,9 +13,12 @@ char pass[] = SECRET_PASS;
 int status = WL_IDLE_STATUS;  // the Wifi radio's status
 
 int digPin = 10;
-WiFiServer server(80);
+WiFiServer server(23);
 Pulses pulses;
 volatile byte state = LOW;
+
+uint32_t previousMillis = 0;
+uint32_t interval = 1000;
 
 void onPulse() {
   state = digitalRead(digPin);
@@ -66,55 +69,11 @@ void setup() {
 void loop() {
   digitalWrite(LED_BUILTIN, state);
   
-  WiFiClient client = server.available();  // listen for incoming clients
+  unsigned long currentMillis = millis();
 
-  if (client) {                    // if you get a client,
-    // debugPrintln("new client");  // print a message out the serial port
-    ApiAction action = ApiAction::UNKNOWN;
-    String currentLine = "";       // make a String to hold incoming data from the client
-    while (client.connected()) {   // loop while the client's connected
-      if (client.available()) {    // if there's bytes to read from the client,
-        char c = client.read();    // read a byte, then
-        // Serial.write(c);           // print it out the serial monitor
-        if (c == '\n') {           // if the byte is a newline character
-
-          // if the current line is blank, you got two newline characters in a row.
-          // that's the end of the client HTTP request, so send a response:
-          if (currentLine.length() == 0) {
-            debugPrint("HTTP request ");
-            debugPrintln((byte) action);
-
-            switch (action) {
-              case ApiAction::UNKNOWN:
-                client.println("HTTP/1.1 404 Not found");
-                break;
-              case ApiAction::DATA:
-                client.println("HTTP/1.1 200 OK");
-                client.println("Content-type:application/json");
-                client.println();
-                pulses.printTo(client);
-                client.println();
-                break;
-              case ApiAction::RESET:
-                pulses.reset();
-                client.println("HTTP/1.1 200 OK");
-                break;
-            }
-            break; // break out of the while loop:
-          } else {  // if you got a newline, then clear currentLine:
-            currentLine = "";
-          }
-        } else if (c != '\r') {  // if you got anything else but a carriage return character,
-          currentLine += c;      // add it to the end of the currentLine
-        }
-
-        if (currentLine.endsWith("GET / HTTP")) {
-           action = ApiAction::DATA;
-        } else if (currentLine.endsWith("GET /reset HTTP")) {
-          action = ApiAction::RESET;
-        }
-      }
-    }
-    client.stop();
+  if (currentMillis - previousMillis > interval) {
+    previousMillis = currentMillis;
+    pulses.printTo(server);
+    server.write(0x0A);
   }
 }

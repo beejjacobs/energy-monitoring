@@ -11,7 +11,7 @@ class Pulses {
     void addPulse(uint32_t);
     void reset();
 
-    void printTo(WiFiClient&);
+    void printTo(Print&);
 
   private:
     uint16_t length;
