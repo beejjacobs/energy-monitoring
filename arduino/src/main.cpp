@@ -6,7 +6,7 @@
 #include "debug.h"
 #include "network.h"
 #include "pulses.h"
-#include "secrets.h"
+#include "secrets_real.h"
 
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
