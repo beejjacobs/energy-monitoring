@@ -1,6 +1,6 @@
 # Energy Monitoring
 
-This project uses pulse counting for monitor energy usage and calculate power consumption.
+This project uses pulse counting for monitoring energy usage and calculating power consumption.
 
 # Parts
 
