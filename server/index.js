@@ -1,60 +1,45 @@
 const net = require('net');
 
 const client = new net.Socket();
-// client.setEncoding('hex');
+client.setEncoding('ascii');
 client.connect(23, '192.168.0.155', function() {
   console.log('Connected');
 });
 
-let res;
+/**
+ * @type {String}
+ */
+let res = '';
 
 /**
  *
- * @param {Buffer} buf
+ * @param {string} buf
  */
 function onData(buf) {
-  if (res) {
-    res = Buffer.concat([res, buf], res.length + buf.length);
-  } else {
-    res = buf;
-  }
-  let index = res.indexOf('\n');
+  res += buf;
+  let index = res.indexOf('\r\n');
   if (index !== -1) {
-    if (index % 4 === 0) {
-      /**
-       * @type {Buffer}
-       */
-      const msg = Uint8Array.prototype.slice.call(res, 0, index + 1);
-      res = res.slice(index + 1);
+      const msg = res.substring(0, index);
+      res = res.substring(index + 1);
       handleMsg(msg);
-    }
   }
 }
+
+const store = new Set();
 /**
  *
- * @param {Buffer} msg
+ * @param {string} msg
  */
 function handleMsg(msg) {
-  if (msg.length < 5) {
-    console.log('invalid message length', msg.length);
-    console.log(msg.toString('hex'));
-    return;
-  }
-  if (msg.length % 4 !== 1) {
-    console.log('invalid message length, expected multiple of 4 + 1', msg.length);
-    console.log(msg.toString('hex'));
-    return;
-  }
   const time = new Date();
-  const refTime = msg.readUInt32LE(0);
-  const pulses = [];
-  for (let i = 4; i < (msg.length - 1); i += 4) {
-    pulses.push(msg.readUInt32LE(i));
-  }
+  const all = msg.split(',').map(parseFloat);
+  const refTime = all[0];
+  const pulses = all.slice(1);
 
-  const times = pulses
+  const dates = pulses
       .map(p => p - refTime)
-      .map(p => new Date(time.valueOf() + p))
+      .map(p => new Date(time.valueOf() + p));
+  const times = dates
       .map(date => {
         const millis = date.getMilliseconds().toString().padStart(3, '0');
         const seconds = date.getSeconds().toString().padStart(2, '0');
@@ -63,7 +48,27 @@ function handleMsg(msg) {
 
         return `${hour}:${minutes}:${seconds}:${millis}`;
       });
-  console.log(refTime.toString(), pulses.join(','), times.join(','));
+
+  dates.forEach(d => store.add(d));
+  console.log(refTime.toString(), 'power:', calcPower() + 'w', pulses.join(','), times.join(','));
+}
+
+const msPerHour = 1000 * 60 * 60;
+
+function calcPower() {
+  if (store.size < 2) {
+    return 0;
+  }
+  const pulses = Array.from(store);
+  /** @type {Date} */
+  const start = pulses[pulses.length - 2];
+  /** @type {Date} */
+  const end = pulses[pulses.length - 1];
+  const timeMs = end.valueOf() - start.valueOf();
+  const timeHrs = timeMs / msPerHour;
+  const power = 1.0 / timeHrs;
+
+  return power.toFixed(0);
 }
 
 client.on('data', onData);

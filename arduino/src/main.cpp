@@ -74,6 +74,6 @@ void loop() {
   if (currentMillis - previousMillis > interval) {
     previousMillis = currentMillis;
     pulses.printTo(server);
-    server.write(0x0A);
+    server.println();
   }
 }

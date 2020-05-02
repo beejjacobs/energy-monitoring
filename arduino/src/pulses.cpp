@@ -17,10 +17,15 @@ void Pulses::reset() {
 }
 
 void Pulses::printTo(Print& client) {
-  uint32_t now = millis();
-
-  client.write((byte*)&now, sizeof(now));
-  for (uint32_t i = 0; i < length; i++) {
-    client.write((byte*)&buffer[i], sizeof(buffer[i]));
+  client.print(millis());
+  if (length > 0) {
+    client.print(',');
   }
+  for (uint16_t i = 0; i < length; i++) {
+    client.print(buffer[i]);
+    if (i < (length - 1)) {
+      client.print(',');
+    }
+  }
+  reset(); // data is lost if no client is connected
 }
