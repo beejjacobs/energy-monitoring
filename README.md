@@ -17,6 +17,8 @@ photodetector are picked up with an interrupt; which marks the "time" the pulses
 occurred. Then there is a basic TCP server on port 23 which sends the data
 every second.
 
+This project uses the [PlatformIO](https://platformio.org/) build system.
+
 # /server
 
 This folder contains a basic Node server for getting data from the Arduino.
