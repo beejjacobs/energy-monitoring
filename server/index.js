@@ -2,7 +2,7 @@ const {ArduinoClient} = require('./arduino-client');
 const {GraphiteClient} = require('./graphite-client');
 
 const arduino = new ArduinoClient('192.168.0.155');
-const graphite = new GraphiteClient('192.168.0.2');
+const graphite = new GraphiteClient();
 
 // stop the process if there are any socket errors
 arduino.on('error', err => {
