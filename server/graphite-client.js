@@ -27,7 +27,7 @@ class GraphiteClient extends EventEmitter {
 
   send(date) {
     const timeSeconds = Math.floor( date / 1000);
-    this.client.write('energy.test.count 1 ' + timeSeconds + '\n');
+    this.client.write('energy.wh.count 1 ' + timeSeconds + '\n');
   }
 }
 
