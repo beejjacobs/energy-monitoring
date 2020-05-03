@@ -1,89 +1,45 @@
-const net = require('net');
+const {ArduinoClient} = require('./arduino-client');
+const {GraphiteClient} = require('./graphite-client');
 
-const client = new net.Socket();
-client.setEncoding('ascii');
-client.connect(23, '192.168.0.155', function() {
-  console.log('Connected');
+const arduino = new ArduinoClient('192.168.0.155');
+const graphite = new GraphiteClient('192.168.0.2');
+
+// stop the process if there are any socket errors
+arduino.on('error', err => {
+  console.error('arduino error', err);
+  process.exit(1);
 });
 
-/**
- * @type {String}
- */
-let res = '';
-
-/**
- *
- * @param {string} buf
- */
-function onData(buf) {
-  res += buf;
-  let index = res.indexOf('\r\n');
-  if (index !== -1) {
-      const msg = res.substring(0, index);
-      res = res.substring(index + 1);
-      handleMsg(msg);
-  }
-}
-
-const store = new Set();
-
-function dateToTime(date) {
-  const millis = date.getMilliseconds().toString().padStart(3, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const hour = date.getHours().toString().padStart(2, '0');
-
-  return `${hour}:${minutes}:${seconds}:${millis}`;
-}
-/**
- *
- * @param {string} msg
- */
-function handleMsg(msg) {
-  const time = new Date();
-  const all = msg.split(',').map(parseFloat);
-  const refTime = all[0];
-  const pulses = all.slice(1);
-
-  const dates = pulses
-      .map(p => p - refTime)
-      .map(p => new Date(time.valueOf() + p));
-  const times = dates.map(dateToTime);
-
-  dates.forEach(d => store.add(d));
-  const last = lastPulseAt();
-  const lastTime = last ? dateToTime(last) : '';
-  console.log(refTime.toString(), 'power:', calcPower() + 'w', lastTime, pulses.join(','), times.join(','));
-}
-
-const msPerHour = 1000 * 60 * 60;
-
-function calcPower() {
-  if (store.size < 2) {
-    return 0;
-  }
-  const pulses = Array.from(store);
-  /** @type {Date} */
-  const start = pulses[pulses.length - 2];
-  /** @type {Date} */
-  const end = pulses[pulses.length - 1];
-  const timeMs = end.valueOf() - start.valueOf();
-  const timeHrs = timeMs / msPerHour;
-  const power = 1.0 / timeHrs;
-
-  return power.toFixed(0);
-}
-
-function lastPulseAt() {
-  if (store.size < 2) {
-    return;
-  }
-  const pulses = Array.from(store);
-  return pulses[pulses.length - 1];
-}
-
-client.on('data', onData);
-
-client.on('close', function() {
-  console.log('Connection closed');
+arduino.on('close', () => {
+  console.error('arduino close');
+  process.exit(1);
 });
+
+graphite.on('error', err => {
+  console.error('graphite error', err);
+  process.exit(1);
+});
+
+graphite.on('close', () => {
+  console.error('graphite close');
+  process.exit(1);
+});
+
+arduino.on('pulses', pulses => {
+  console.log('pulses', pulses);
+  pulses.forEach(date => graphite.send(date));
+});
+
+arduino.connect()
+  .then(() => console.log('connected to arduino'))
+  .catch(err => {
+    console.log(`couldn't connect to arduino`);
+    process.exit(1);
+  });
+
+graphite.connect()
+  .then(() => console.log('connected to graphite'))
+  .catch(err => {
+    console.log(`couldn't connect to graphite`);
+    process.exit(1);
+  });
