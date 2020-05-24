@@ -2,7 +2,7 @@
 
 #include <WiFiNINA.h>
 
-#define MAX_LENGTH 256 * 16
+#define MAX_LENGTH 256 * 4
 
 class Pulses {
   public:
