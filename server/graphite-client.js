@@ -14,7 +14,7 @@ class GraphiteClient extends EventEmitter {
 
       this.client.on('error', err => {
         reject();
-        this.emit('error');
+        this.emit('error', err);
       });
       this.client.on('close', () => {
         this.emit('close');
@@ -26,6 +26,9 @@ class GraphiteClient extends EventEmitter {
 
 
   send(date) {
+    if (!this.client || this.client.connecting) {
+      return;
+    }
     const timeSeconds = Math.floor( date / 1000);
     this.client.write('energy.wh.count 1 ' + timeSeconds + '\n');
   }

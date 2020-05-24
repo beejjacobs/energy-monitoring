@@ -17,7 +17,7 @@ class ArduinoClient extends EventEmitter {
 
       this.client.on('error', err => {
         reject();
-        this.emit('error');
+        this.emit('error', err);
       });
       this.client.on('data', data => this.onData(data));
       this.client.on('close', () => {
@@ -26,6 +26,10 @@ class ArduinoClient extends EventEmitter {
 
       this.client.connect(this.port, this.ip, resolve);
     });
+  }
+
+  disconnect() {
+    this.client.destroy();
   }
 
 
