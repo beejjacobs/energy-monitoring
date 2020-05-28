@@ -27,9 +27,22 @@ void onPulse() {
   }
 }
 
+void connectToWifi() {
+  debugPrint("Attempting to connect to WPA SSID: ");
+  debugPrintln(ssid);
+  status = WiFi.begin(ssid, pass);
+
+  while (status != WL_CONNECTED) {
+    delay(2000);
+    debugPrint("Attempting to connect to WPA SSID: ");
+    debugPrintln(ssid);
+    status = WiFi.begin(ssid, pass);
+  }
+}
+
 void setup() {
+  Serial.begin(9600);
   if (debug) {
-    Serial.begin(9600);
     while (!Serial) {
     }
   }
@@ -45,16 +58,7 @@ void setup() {
     debugPrintln("Please upgrade the firmware");
   }
 
-  debugPrint("Attempting to connect to WPA SSID: ");
-  debugPrintln(ssid);
-  status = WiFi.begin(ssid, pass);
-
-  while (status != WL_CONNECTED) {
-    delay(2000);
-    debugPrint("Attempting to connect to WPA SSID: ");
-    debugPrintln(ssid);
-    status = WiFi.begin(ssid, pass);
-  }
+  connectToWifi();
 
   debugPrintln("Connected to the network");
   printIp();
@@ -73,7 +77,15 @@ void loop() {
 
   if (currentMillis - previousMillis > interval) {
     previousMillis = currentMillis;
-    pulses.printTo(server);
-    server.println();
+    status = WiFi.status();
+    if (status == WL_CONNECTED) {
+      // we're connected, let's send some data
+      pulses.printTo(server);
+      server.println();
+    } else if (status == WL_DISCONNECTED || status == WL_CONNECTION_LOST) {
+      // we lost WiFi, let's reconnect
+      connectToWifi();
+      server.begin();
+    }
   }
 }
