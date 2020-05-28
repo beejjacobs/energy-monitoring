@@ -57,7 +57,7 @@ void setup() {
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
     debugPrintln("Please upgrade the firmware");
   }
-
+  server.begin();
   connectToWifi();
 
   debugPrintln("Connected to the network");
@@ -66,8 +66,6 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(digPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(digPin), onPulse, CHANGE);
-
-  server.begin();
 }
 
 void loop() {
@@ -85,7 +83,6 @@ void loop() {
     } else if (status == WL_DISCONNECTED || status == WL_CONNECTION_LOST) {
       // we lost WiFi, let's reconnect
       connectToWifi();
-      server.begin();
     }
   }
 }
