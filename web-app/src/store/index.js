@@ -83,20 +83,23 @@ export default new Vuex.Store({
   },
   actions: {
     fetch({dispatch}) {
-      dispatch('fetchLast5Mins').catch(console.error);
-      dispatch('getToday').catch(console.error);
       let tick = 0;
-      intervalId = setInterval(() => {
+      function run() {
         tick++;
-        dispatch('fetchLast5Mins').catch(console.error);
+        dispatch('fetchLast5Mins')
+            .catch(console.error)
+            .finally(() => {
+              intervalId = setTimeout(run, 5 * 1000);
+            });
         if (tick === 5) {
           dispatch('getToday').catch(console.error);
           tick = 0;
         }
-      }, 5 * 1000);
+      }
+      run();
     },
     clearFetch() {
-      clearInterval(intervalId);
+      clearTimeout(intervalId);
     },
     async fetchLast5Mins({commit}) {
       const res = await fetch('http://192.168.0.2:9000/render?from=-5minutes&target=energy.wh.count&format=json');
