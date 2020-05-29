@@ -84,6 +84,7 @@ export default new Vuex.Store({
   actions: {
     fetch({dispatch}) {
       let tick = 0;
+      dispatch('getToday').catch(console.error);
       function run() {
         tick++;
         dispatch('fetchLast5Mins')
