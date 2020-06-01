@@ -1,20 +1,22 @@
 <template>
   <v-app>
     <v-content>
-      <v-simple-table style="max-width: 250px;" dense class="ma-4">
+      <v-simple-table style="max-width: 275px;" dense class="ma-4">
         <tr>
           <td><span v-if="latestPoint">Last Pulse</span></td>
-          <td class="text-right">
+          <td class="text-right" colspan="2">
             <span v-if="latestPoint">{{ ((new Date().valueOf() / 1000) - latestPoint.time).toFixed(0) }}s ago</span>
           </td>
         </tr>
         <tr>
           <td>Current Power</td>
-          <td class="text-right">{{ watts }} W</td>
+          <td class="text-right">{{ watts }}</td>
+          <td>W</td>
         </tr>
         <tr>
           <td>Energy Usage Today</td>
-          <td class="text-right">{{ todayWh }} Wh</td>
+          <td class="text-right">{{ todayWh }}</td>
+          <td>Wh</td>
         </tr>
       </v-simple-table>
       <line-graph :chart-data="chartData" :options="chartOptions"/>
