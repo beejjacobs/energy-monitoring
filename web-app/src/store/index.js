@@ -1,19 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import moment from 'moment'
+import {computeMidPoint, computePower} from '@/store/util';
+
+import day from './day';
 
 Vue.use(Vuex)
-
-function computePower(points) {
-  const total = points.reduce((total, point) => total + point.value, 0);
-  const timeSpanSeconds = points[0].time - points[points.length - 1].time;
-  return total / (timeSpanSeconds / 3600);
-}
-
-function computeMidPoint(points) {
-  const timeSpanSeconds = points[0].time - points[points.length - 1].time;
-  return points[0].time - (timeSpanSeconds / 2);
-}
 
 let intervalId;
 
@@ -138,5 +130,8 @@ export default new Vuex.Store({
 
       commit('setToday', points);
     }
+  },
+  modules: {
+    day
   }
 });
