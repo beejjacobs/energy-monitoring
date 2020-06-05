@@ -54,7 +54,7 @@ graphite.connect()
     process.exit(1);
   });
 
-// check for pulses every 1.5s
+// check for pulses every 5s
 setInterval(() => {
   if (!recieved) {
     console.log('watchdog run');
@@ -71,4 +71,4 @@ setInterval(() => {
       });
   }
   recieved = false;
-}, 2000);
+}, 5000);
