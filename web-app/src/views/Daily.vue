@@ -13,7 +13,6 @@
 
 <script>
 import {mapGetters} from 'vuex';
-import moment from 'moment';
 import LineGraph from '@/components/LineGraph';
 
 export default {
@@ -64,8 +63,7 @@ export default {
     }
   },
   mounted() {
-    const now = moment();
-    this.$store.dispatch('day/getForDate', now.format('YYYYMMDD'))
+    this.$store.dispatch('day/getForDate', new Date())
       .catch(console.error);
   }
 };

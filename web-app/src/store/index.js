@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import moment from 'moment'
 import {computeMidPoint, computePower} from '@/store/util';
 
 import day from './day';
+import {graphite} from '@/api/graphite';
 
 Vue.use(Vuex)
 
@@ -95,39 +95,12 @@ export default new Vuex.Store({
       clearTimeout(intervalId);
     },
     async fetchLast5Mins({commit}) {
-      const res = await fetch('http://192.168.0.2:9000/render?from=-5minutes&target=energy.wh.count&format=json');
-      const targets = await res.json();
-      const target = targets.find(t => t.target === 'energy.wh.count');
-      if (!target) {
-        throw new Error(`energy.wh.count not returned got ${targets}`);
-      }
-      const points = target.datapoints.map(dp => {
-        return {
-          time: dp[1],
-          value: dp[0]
-        };
-      }).reverse();
-
+      const points = await graphite.from('-5minutes');
       commit('setData', points);
     },
 
     async getToday({commit}) {
-      const midnight = moment().hour(0).minute(0).second(0);
-      const from = midnight.format('YYYYMMDD');
-      const url = `http://192.168.0.2:9000/render?from=${from}&target=summarize(energy.wh.count,"1day")&format=json`;
-      const res = await fetch(encodeURI(url));
-      const targets = await res.json();
-      const target = targets.find(t => t.tags.name === 'energy.wh.count');
-      if (!target) {
-        throw new Error(`energy.wh.count not returned got ${targets}`);
-      }
-      const points = target.datapoints.map(dp => {
-        return {
-          time: dp[1],
-          value: dp[0]
-        };
-      }).reverse();
-
+      const points = await graphite.summarize(new Date(), '1day');
       commit('setToday', points);
     }
   },

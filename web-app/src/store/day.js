@@ -1,4 +1,5 @@
 import {computeMidPoint, computePower} from '@/store/util';
+import {graphite} from '@/api/graphite';
 
 export default {
   namespaced: true,
@@ -40,19 +41,7 @@ export default {
   },
   actions: {
     async getForDate({commit}, date) {
-      const url = `http://192.168.0.2:9000/render?from=${date}&target=summarize(energy.wh.count,"1min")&format=json`;
-      const res = await fetch(encodeURI(url));
-      const targets = await res.json();
-      const target = targets.find(t => t.tags.name === 'energy.wh.count');
-      if (!target) {
-        throw new Error(`energy.wh.count not returned got ${targets}`);
-      }
-      const points = target.datapoints.map(dp => {
-        return {
-          time: dp[1],
-          value: dp[0]
-        };
-      }).reverse();
+      const points = await graphite.summarize(date, '1min');
 
       console.log('getForDate', points);
 
