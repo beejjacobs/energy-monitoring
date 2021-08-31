@@ -21,4 +21,13 @@ This project uses the [PlatformIO](https://platformio.org/) build system.
 
 # /server
 
-This folder contains a basic Node server for getting data from the Arduino.
+This folder contains a basic Node server for getting data from the Arduino and sending it to a graphite instance.
+
+## Graphite
+
+Example storage-schema (~60mb disk usage):
+```
+[energy]
+pattern = ^energy
+retentions = 1s:1d,10s:8w,10m:100y
+```
