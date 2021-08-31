@@ -4,7 +4,7 @@
       <tr>
         <td><span v-if="latestPoint">Last Pulse</span></td>
         <td class="text-right" colspan="2">
-          <span v-if="latestPoint">{{ ((new Date().valueOf() / 1000) - latestPoint.time).toFixed(0) }}s ago</span>
+          <span v-if="latestPoint">{{ (nowSeconds - latestPoint.time).toFixed(0) }}s ago</span>
         </td>
       </tr>
       <tr>
@@ -29,6 +29,12 @@ import LineGraph from '@/components/LineGraph';
 export default {
   name: 'Live',
   components: {LineGraph},
+  data() {
+    return {
+      now: new Date(),
+      nowIntervalId: null
+    };
+  },
   computed: {
     ...mapGetters([
       'accumulate',
@@ -38,6 +44,9 @@ export default {
       'totalkWh',
       'watts'
     ]),
+    nowSeconds() {
+      return this.now.getTime() / 1000;
+    },
     chartData() {
       return {
         datasets: [
@@ -79,8 +88,12 @@ export default {
   },
   mounted() {
     this.$store.dispatch('fetch').catch(console.error);
+    this.nowIntervalId = setInterval(() => {
+      this.now = new Date();
+    }, 1000);
   },
   beforeDestroy() {
+    clearInterval(this.nowIntervalId);
     this.$store.dispatch('clearFetch').catch(console.error);
   }
 };
