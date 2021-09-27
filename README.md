@@ -31,3 +31,9 @@ Example storage-schema (~60mb disk usage):
 pattern = ^energy
 retentions = 1s:1d,10s:8w,10m:100y
 ```
+
+Aggregation rules (`aggregation-rules.conf`):
+
+```
+energy.wh.count (1) = sum energy.wh.count
+```
